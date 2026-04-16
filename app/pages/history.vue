@@ -1,6 +1,8 @@
 <template>
-  <div class="space-y-6">
-    <QCard :dark="isDark" flat bordered class="bg-card text-foreground">
+  <NuxtPage v-if="isDetailRoute" />
+
+  <div v-else class="space-y-6">
+    <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
       <QCardSection class="flex items-start justify-between gap-4">
         <div>
           <h4 class="text-lg font-semibold">История заказов</h4>
@@ -15,7 +17,7 @@
     </QCard>
 
     <div v-if="currentUser" class="grid gap-6 lg:grid-cols-2">
-      <QCard :dark="isDark" flat bordered class="bg-card text-foreground">
+      <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
         <QCardSection>
           <h3 class="font-semibold">Букеты</h3>
         </QCardSection>
@@ -33,11 +35,10 @@
             :key="entry.id"
             expand-separator
             dense
-            header-class="rounded-xl"
           >
             <template #header>
-              <QItemSection>
-                <QItemLabel class="font-medium">{{ entry.name }}</QItemLabel>
+              <QItemSection  >
+                <!-- <QItemLabel class="font-medium">{{ entry.name }}</QItemLabel> -->
                 <QItemLabel caption>{{ formatDate(entry.createdAt) }}</QItemLabel>
               </QItemSection>
               <QItemSection side>
@@ -60,7 +61,7 @@
                   :to="`/history/bouquets/${entry.id}`"
                   class="mt-3 inline-flex rounded-2xl bg-(--q-primary) px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
                 >
-                  Открыть подробно
+                  Подробнее
                 </NuxtLink>
               </QCardSection>
             </QCard>
@@ -68,7 +69,7 @@
         </QList>
       </QCard>
 
-      <QCard :dark="isDark" flat bordered class="bg-card text-foreground">
+      <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
         <QCardSection>
           <h3 class="font-semibold">Разные товары</h3>
         </QCardSection>
@@ -113,7 +114,7 @@
                   :to="`/history/misc/${entry.id}`"
                   class="mt-3 inline-flex rounded-2xl bg-(--q-primary) px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
                 >
-                  Открыть подробно
+                  Подробнее
                 </NuxtLink>
               </QCardSection>
             </QCard>
@@ -131,8 +132,12 @@ const theme = useCookie<'light' | 'dark'>('florist-theme', {
   default: () => 'light',
   sameSite: 'lax',
 })
+const route = useRoute()
 
 const isDark = computed(() => theme.value === 'dark')
+const isDetailRoute = computed(() => {
+  return typeof route.params.type === 'string' && typeof route.params.id === 'string'
+})
 
 type BouquetLine = {
   itemId: string
@@ -177,6 +182,7 @@ const flowers = ref<FlowerItem[]>([])
 
 const formatDate = (value: string) => new Date(value).toLocaleString('ru-RU')
 const getFlowerName = (itemId: string) => flowers.value.find((flower) => flower.id === itemId)?.name ?? itemId
+const openHistoryDetail = (type: 'bouquets' | 'misc', id: string) => navigateTo(`/history/${type}/${id}`)
 
 onMounted(async () => {
   if (!currentUser.value) {

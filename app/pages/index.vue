@@ -1,18 +1,10 @@
 <template>
-  <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
-    <QCard :dark="isDark" flat bordered class="bg-card text-foreground">
-      <QCardSection class="flex items-start justify-between gap-4">
-        <div>
-          <p class="mt-1 text-sm text-muted-foreground">
-            Смешанный расчёт: букет и разные товары в одном заказе.
-          </p>
-        </div>
-
-      </QCardSection>
- 
-      <QSeparator :dark="isDark" />
-
-      <QCardSection v-if="!currentUser">
+  <div
+    class="gap-6"
+    :class="hasSidebar ? 'grid lg:grid-cols-[2fr_1fr]' : 'mx-auto max-w-3xl'"
+  >
+    <QCard v-if="!currentUser" :dark="isDark" flat bordered class="bg-card text-foreground">
+      <QCardSection>
         <div class="grid gap-4 md:grid-cols-3">
           <QInput :dark="isDark" v-model="loginForm.username" outlined label="Логин" placeholder="owner" />
           <QInput :dark="isDark" v-model="loginForm.password" outlined type="password" label="Пароль" placeholder="owner123" />
@@ -29,146 +21,133 @@
           Тестовые аккаунты: `owner / owner123`, `florist / florist123`
         </p>
       </QCardSection>
-
-      <QCardSection v-else>
-        <div class="flex flex-wrap gap-3">
-          <QBtn
-            :dark="isDark"
-            unelevated
-            no-caps
-            :color="bouquetEnabled ? 'primary' : 'grey-7'"
-            :outline="!bouquetEnabled"
-            class="rounded-2xl"
-            label="Букет"
-            @click="toggleBouquet"
-          />
-          <QBtn
-            :dark="isDark"
-            unelevated
-            no-caps
-            :color="miscEnabled ? 'primary' : 'grey-7'"
-            :outline="!miscEnabled"
-            class="rounded-2xl"
-            label="Разные товары"
-            @click="toggleMisc"
-          />
-        </div>
-
-        <QCard :dark="isDark" v-if="bouquetEnabled" flat bordered class="mt-6 bg-card">
-          <QCardSection class="flex items-center justify-between gap-4">
-            <div>
-              <h3 class="font-semibold">Состав букета</h3>
-              <p class="text-sm text-muted-foreground">
-                Каталог цветов загружается отдельно и QR будет только для этой части.
-              </p>
-            </div>
-            <QBtn :dark="isDark" class="rounded-2xl" outline no-caps color="primary" label="+ Добавить цветок" @click="addBouquetLine" />
-          </QCardSection>
-
-          <QSeparator :dark="isDark" />
-
-          <QCardSection class="space-y-3">
-            <QCard
-              :dark="isDark"
-              v-for="line in bouquetLines"
-              :key="line.id"
-              flat
-              bordered
-              class="bg-background"
-            >
-              <QCardSection class="grid gap-3 md:grid-cols-3">
-                <QSelect
-                  :dark="isDark"
-                  v-model="line.itemId"
-                  outlined
-                  emit-value
-                  map-options
-                  label="Цветок"
-                  :options="flowerOptions"
-                />
-                <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
-                <div class="flex items-end">
-                  <QBtn :dark="isDark" class="rounded-2xl" flat no-caps color="negative" label="Удалить" @click="removeBouquetLine(line.id)" />
-                </div>
-              </QCardSection>
-            </QCard>
-          </QCardSection>
-
-          <QSeparator :dark="isDark" />
-
-          <QCardSection class="grid gap-3 md:grid-cols-3">
-            <QInput :dark="isDark" v-model.number="markupPercent" outlined type="number" min="0" label="Наценка (%)" />
-            <QInput :dark="isDark" v-model.number="packagingCost" outlined type="number" min="0" label="Упаковка (KGS)" />
-            <QInput :dark="isDark" v-model.number="laborCost" outlined type="number" min="0" label="Работа флориста (KGS)" />
-          </QCardSection>
-        </QCard>
-
-        <QCard :dark="isDark" v-if="miscEnabled" flat bordered class="mt-6 bg-card">
-          <QCardSection class="flex items-center justify-between gap-4">
-            <div>
-              <h3 class="font-semibold">Разные товары</h3>
-              <p class="text-sm text-muted-foreground">
-                Открытки, грунт, домашние цветы и другие доп. позиции.
-              </p>
-            </div>
-            <QBtn :dark="isDark" class="rounded-2xl" outline no-caps color="primary" label="+ Добавить товар" @click="addMiscLine" />
-          </QCardSection>
-
-          <QSeparator :dark="isDark" />
-
-          <QCardSection class="space-y-3">
-            <QCard
-              :dark="isDark"
-              v-for="line in miscLines"
-              :key="line.id"
-              flat
-              bordered
-              class="bg-background"
-            >
-              <QCardSection class="grid gap-3 md:grid-cols-3">
-                <QSelect
-                  :dark="isDark"
-                  v-model="line.itemId"
-                  outlined
-                  emit-value
-                  map-options
-                  label="Товар"
-                  :options="miscProductOptions"
-                />
-                <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
-                <div class="flex items-end">
-                  <QBtn :dark="isDark" class="rounded-2xl" flat no-caps color="negative" label="Удалить" @click="removeMiscLine(line.id)" />
-                </div>
-              </QCardSection>
-            </QCard>
-          </QCardSection>
-        </QCard>
-
-        <div class="mt-6 flex flex-wrap gap-3">
-          <QBtn
-            :dark="isDark"
-            v-if="miscEnabled || bouquetEnabled"
-            unelevated
-            no-caps
-            color="primary"
-            class="rounded-2xl"
-            label="Оформить заказ"
-            @click="submitOrder"
-          />
-        </div>
-
-        <QBanner :dark="isDark" v-if="requestError" dense inline-actions rounded class="mt-4 bg-red-1 text-negative">
-          {{ requestError }}
-        </QBanner>
-      </QCardSection>
     </QCard>
 
-    <aside class="space-y-4">
-      <QCard :dark="isDark" v-if="result" flat bordered class="bg-card text-foreground">
-        <QCardSection>
-          <h3 class="font-semibold">Итог расчёта</h3>
+    <div v-else class="space-y-6">
+      <div v-if="!bouquetEnabled && !miscEnabled" class="space-y-4 text-center">
+        <h4 class="text-2xl font-semibold tracking-tight">Начать процесс оформления заказа</h4>
+        <p class="text-sm text-muted-foreground">
+          Выбери, что добавить в заказ первым.
+        </p>
+      </div>
 
-          <div class="mt-4 space-y-2 text-sm">
+      <div class="flex items-center justify-center gap-3">
+        <button
+          type="button"
+          class="min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
+          :class="bouquetEnabled ? 'border-transparent bg-(--q-primary) text-white shadow-sm' : 'border-border bg-background text-foreground hover:border-(--q-primary) hover:text-foreground'"
+          @click="toggleBouquet"
+        >
+          Букет
+        </button>
+        <button
+          type="button"
+          class="min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
+          :class="miscEnabled ? 'border-transparent bg-(--q-primary) text-white shadow-sm' : 'border-border bg-background text-foreground hover:border-(--q-primary) hover:text-foreground'"
+          @click="toggleMisc"
+        >
+          Разные товары
+        </button>
+      </div>
+
+      <section v-if="bouquetEnabled" class="rounded-2xl border border-border/70 bg-background/60 p-4 md:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="font-semibold">Состав букета</h4>
+            <p class="text-sm text-muted-foreground">
+              Каталог цветов загружается отдельно, QR формируется только для букета.
+            </p>
+          </div>
+          <QBtn class="rounded-2xl!" :dark="isDark" outline no-caps color="positive" label="+ Добавить цветок" @click="addBouquetLine" />
+        </div>
+
+        <div class="mt-4 space-y-3">
+          <div
+            v-for="line in bouquetLines"
+            :key="line.id"
+            class="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
+          >
+            <QSelect
+              :dark="isDark"
+              v-model="line.itemId"
+              outlined
+              emit-value
+              map-options
+              label="Цветок"
+              :options="flowerOptions"
+            />
+            <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
+            <div class="flex items-center">
+              <QBtn class="rounded-full!" :dark="isDark" flat no-caps color="negative" label="Удалить" @click="removeBouquetLine(line.id)" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3 md:grid-cols-3">
+          <QInput :dark="isDark" v-model.number="markupPercent" outlined type="text" label="Наценка (%)" />
+          <QInput :dark="isDark" v-model.number="packagingCost" outlined type="text" label="Упаковка (KGS)" />
+          <QInput :dark="isDark" v-model.number="laborCost" outlined type="text"label="Работа флориста (KGS)" />
+        </div>
+      </section>
+
+      <section v-if="miscEnabled" class="rounded-2xl border border-border/70 bg-background/60 p-4 md:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="font-semibold">Разные товары</h4>
+            <p class="text-sm text-muted-foreground">
+              Дополнительные позиции к заказу без QR.
+            </p>
+          </div>
+          <QBtn class="rounded-2xl!" :dark="isDark" outline no-caps color="positive" label="+ Добавить товар" @click="addMiscLine" />
+        </div>
+
+        <div class="mt-4 space-y-3">
+          <div
+            v-for="line in miscLines"
+            :key="line.id"
+            class="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
+          >
+            <QSelect
+              :dark="isDark"
+              v-model="line.itemId"
+              outlined
+              emit-value
+              map-options
+              label="Товар"
+              :options="miscProductOptions"
+            />
+            <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
+            <div class="flex items-center">
+              <QBtn class="rounded-full!" :dark="isDark" flat no-caps color="negative" label="Удалить" @click="removeMiscLine(line.id)" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
+        <QBtn
+          :dark="isDark"
+          v-if="miscEnabled || bouquetEnabled"
+          unelevated
+          no-caps
+          color="primary"
+          class="rounded-2xl"
+          label="Оформить заказ"
+          @click="submitOrder"
+        />
+      </div>
+
+      <QBanner :dark="isDark" v-if="requestError" dense inline-actions rounded class="mt-4 bg-red-1 text-negative">
+        {{ requestError }}
+      </QBanner>
+    </div>
+
+    <aside v-if="hasSidebar" class="space-y-4">
+      <QCard :dark="isDark" v-if="result" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
+        <QCardSection class="space-y-3">
+          <h4 class="text-2xl font-semibold leading-tight">Итог расчёта</h4>
+
+          <div class="space-y-2 text-sm">
             <div v-if="bouquetEnabled" class="flex items-center justify-between gap-3">
               <span class="text-muted-foreground">Букет</span>
               <strong>{{ result?.bouquet?.total ?? 0 }} KGS</strong>
@@ -185,19 +164,19 @@
         </QCardSection>
       </QCard>
 
-      <QCard :dark="isDark" v-if="savedBouquet" flat bordered class="bg-card text-foreground">
-        <QCardSection>
-          <h3 class="font-semibold">Букет сохранён</h3>
-          <p class="mt-2 text-sm text-muted-foreground">{{ formatDate(savedBouquet.createdAt) }}</p>
+      <QCard :dark="isDark" v-if="savedBouquet" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
+        <QCardSection class="space-y-3">
+          <h4 class="text-2xl font-semibold leading-tight">Букет сохранён</h4>
+          <p class="text-sm text-muted-foreground">{{ formatDate(savedBouquet.createdAt) }}</p>
           <p class="text-sm">Цена: {{ savedBouquet.total }} KGS</p>
-          <div class="mt-3 flex items-center gap-4">
+          <div class="flex flex-col! items-center md:flex-nowrap! md:items-end gap-4">
             <img :src="savedBouquet.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg border bg-white p-2">
             <QBtn
               :dark="isDark"
               unelevated
               no-caps
               color="primary"
-              class="rounded-2xl"
+              class="w-full! rounded-2xl!"
               label="Печать"
               @click="printBouquetQr"
             />
@@ -209,7 +188,7 @@
 </template>
 
 <script setup lang="ts">
-import { QBanner, QBtn, QCard, QCardSection, QInput, QSelect, QSeparator } from 'quasar'
+import { QBanner, QBtn, QCard, QCardSection, QInput, QSelect } from 'quasar'
 
 const theme = useCookie<'light' | 'dark'>('florist-theme', {
   default: () => 'light',
@@ -271,6 +250,16 @@ type SavedBouquet = {
   qrDataUrl: string
 }
 
+type PersistedCalculatorState = {
+  bouquetEnabled: boolean
+  miscEnabled: boolean
+  bouquetLines: EditableLine[]
+  miscLines: EditableLine[]
+  markupPercent: number
+  packagingCost: number
+  laborCost: number
+}
+
 const {
   currentUser,
   loadFlowers,
@@ -300,6 +289,8 @@ const result = ref<MixedResult | null>(null)
 const savedBouquet = ref<SavedBouquet | null>(null)
 const requestError = ref('')
 const authError = ref('')
+const hasSidebar = computed(() => Boolean(result.value || savedBouquet.value))
+const calculatorStorageKey = 'florist-calculator-state'
 
 const flowerOptions = computed<SelectOption[]>(() =>
   flowers.value.map((flower) => ({
@@ -320,6 +311,77 @@ const createLine = (itemId = ''): EditableLine => ({
   itemId,
   count: 1,
 })
+
+const sanitizeLines = (value: unknown): EditableLine[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value.map((line) => {
+    const entry = typeof line === 'object' && line ? line as Partial<EditableLine> : {}
+    return {
+      id: typeof entry.id === 'string' && entry.id.length > 0 ? entry.id : crypto.randomUUID(),
+      itemId: typeof entry.itemId === 'string' ? entry.itemId : '',
+      count: typeof entry.count === 'number' && Number.isFinite(entry.count) ? entry.count : 1,
+    }
+  })
+}
+
+const saveCalculatorState = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const snapshot: PersistedCalculatorState = {
+    bouquetEnabled: bouquetEnabled.value,
+    miscEnabled: miscEnabled.value,
+    bouquetLines: bouquetLines.value,
+    miscLines: miscLines.value,
+    markupPercent: markupPercent.value,
+    packagingCost: packagingCost.value,
+    laborCost: laborCost.value,
+  }
+
+  localStorage.setItem(calculatorStorageKey, JSON.stringify(snapshot))
+}
+
+const restoreCalculatorState = async () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const raw = localStorage.getItem(calculatorStorageKey)
+  if (!raw) {
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<PersistedCalculatorState>
+    bouquetEnabled.value = Boolean(parsed.bouquetEnabled)
+    miscEnabled.value = Boolean(parsed.miscEnabled)
+    bouquetLines.value = sanitizeLines(parsed.bouquetLines)
+    miscLines.value = sanitizeLines(parsed.miscLines)
+    markupPercent.value = typeof parsed.markupPercent === 'number' ? parsed.markupPercent : 150
+    packagingCost.value = typeof parsed.packagingCost === 'number' ? parsed.packagingCost : 90
+    laborCost.value = typeof parsed.laborCost === 'number' ? parsed.laborCost : 120
+
+    if (bouquetEnabled.value) {
+      flowers.value = await loadFlowers()
+      if (bouquetLines.value.length === 0) {
+        bouquetLines.value = [createLine(flowers.value[0]?.id ?? '')]
+      }
+    }
+
+    if (miscEnabled.value) {
+      miscProducts.value = await loadMiscProducts()
+      if (miscLines.value.length === 0) {
+        miscLines.value = [createLine(miscProducts.value[0]?.id ?? '')]
+      }
+    }
+  } catch {
+    localStorage.removeItem(calculatorStorageKey)
+  }
+}
 
 const addBouquetLine = () => {
   bouquetLines.value.push(createLine(flowers.value[0]?.id ?? ''))
@@ -490,4 +552,23 @@ const printBouquetQr = () => {
 }
 
 const formatDate = (value: string) => new Date(value).toLocaleString('ru-RU')
+
+onMounted(async () => {
+  if (!currentUser.value) {
+    return
+  }
+
+  await restoreCalculatorState()
+})
+
+watch(
+  [bouquetEnabled, miscEnabled, bouquetLines, miscLines, markupPercent, packagingCost, laborCost, currentUser],
+  () => {
+    if (!currentUser.value) {
+      return
+    }
+    saveCalculatorState()
+  },
+  { deep: true },
+)
 </script>

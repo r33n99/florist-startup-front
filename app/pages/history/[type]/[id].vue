@@ -1,18 +1,17 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between gap-4">
-      <div>
-        <p class="text-sm text-muted-foreground">История</p>
-        <h1 class="text-2xl font-semibold">
-          {{ pageTitle }}
-        </h1>
-      </div>
-      <NuxtLink
+      <div class="flex items-center gap-4">
+        <NuxtLink
         to="/history"
         class="rounded-2xl bg-(--q-primary) px-4 py-2 text-sm text-white transition-opacity hover:opacity-90"
       >
         Назад к истории
       </NuxtLink>
+        <h4 class="text-2xl font-semibold">
+          {{ pageTitle }}
+        </h4>
+      </div>
     </div>
 
     <QBanner v-if="loadError" :dark="isDark" rounded class="bg-red-1 text-negative">

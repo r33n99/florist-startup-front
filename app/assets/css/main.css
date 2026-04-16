@@ -65,4 +65,8 @@ body.body--dark {
   .q-btn {
     @apply rounded-2xl;
   }
+
+  .q-field--outlined .q-field__control {
+    border-radius: 1rem;
+  }
 }

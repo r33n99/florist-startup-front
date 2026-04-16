@@ -3,8 +3,8 @@
     <header class="border-b bg-card/95 backdrop-blur">
       <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p class="text-sm text-muted-foreground">Florist Studio</p>
-          <h4 class="text-2xl font-semibold tracking-tight">Back-office MVP</h4>
+          <p class="text-sm text-muted-foreground">Florist Studio v0.1</p>
+          <h5 class="text-2xl font-semibold tracking-tight">Демо версия приложения для флористов</h5>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -23,7 +23,7 @@
                 name="light_mode"
                 size="15px"
                 class="transition-colors duration-300"
-                :class="isDark ? 'text-muted-foreground/45' : 'text-amber-500'"
+                :class="!isDark && 'text-amber-500'"
               />
             </span>
             <span class="absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center">
@@ -31,7 +31,7 @@
                 name="dark_mode"
                 size="15px"
                 class="transition-colors duration-300"
-                :class="isDark ? 'text-slate-300' : 'text-muted-foreground/45'"
+                :class="!isDark && 'text-slate-300'"
               />
             </span>
           </button>
@@ -49,9 +49,9 @@
           >
             История
           </NuxtLink>
-          <p v-if="currentUser" class="ml-2 text-sm font-medium text-foreground">
+          <div v-if="currentUser" class="flex items-center md:px-3 text-sm font-medium leading-none text-foreground">
             {{ currentUser.displayName }}
-          </p>
+          </div>
         </div>
       </div>
     </header>

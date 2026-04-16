@@ -102,6 +102,51 @@ export const useBouquetCalculator = () => {
   })
   const currentUser = useState<AuthUser | null>('florist-current-user', () => currentUserCookie.value)
 
+  const clearAuth = () => {
+    authToken.value = null
+    currentUser.value = null
+    currentUserCookie.value = null
+  }
+
+  const resolveAuthorizationHeader = (options: { headers?: unknown }): string | undefined => {
+    const raw = unref(options.headers as unknown)
+    if (!raw) {
+      return undefined
+    }
+    if (typeof Headers !== 'undefined' && raw instanceof Headers) {
+      return raw.get('Authorization') ?? undefined
+    }
+    if (Array.isArray(raw)) {
+      const pair = raw.find(([key]) => key.toLowerCase() === 'authorization')
+      return pair?.[1]
+    }
+    const record = raw as Record<string, string>
+    return record.Authorization ?? record.authorization
+  }
+
+  /** Старый in-flight запрос с прошлым Bearer не должен сбрасывать свежую сессию после логина. */
+  const isStaleUnauthorized = (options: { headers?: unknown }): boolean => {
+    const sent = resolveAuthorizationHeader(options)
+    const expected = authToken.value ? `Bearer ${authToken.value}` : undefined
+    if (!sent || !expected) {
+      return false
+    }
+    return sent !== expected
+  }
+
+  const apiFetch = $fetch.create({
+    baseURL: config.public.apiBase as string,
+    onResponseError({ response, options }) {
+      if (response.status !== 401 || !import.meta.client) {
+        return
+      }
+      if (isStaleUnauthorized(options)) {
+        return
+      }
+      clearAuth()
+    },
+  })
+
   const authHeaders = computed<Record<string, string> | undefined>(() => {
     if (!authToken.value) {
       return undefined
@@ -117,14 +162,34 @@ export const useBouquetCalculator = () => {
     key: 'flowers:catalog',
     immediate: false,
     server: false,
+    watch: false,
     headers: authHeaders,
+    onResponseError({ response, options }) {
+      if (response.status !== 401 || !import.meta.client) {
+        return
+      }
+      if (isStaleUnauthorized(options)) {
+        return
+      }
+      clearAuth()
+    },
   })
   const miscProductsRequest = useFetch<MiscProduct[]>('/misc-products', {
     baseURL: config.public.apiBase,
     key: 'misc-products:catalog',
     immediate: false,
     server: false,
+    watch: false,
     headers: authHeaders,
+    onResponseError({ response, options }) {
+      if (response.status !== 401 || !import.meta.client) {
+        return
+      }
+      if (isStaleUnauthorized(options)) {
+        return
+      }
+      clearAuth()
+    },
   })
 
   const loadFlowers = async (): Promise<FlowerItem[]> => {
@@ -162,25 +227,34 @@ export const useBouquetCalculator = () => {
     return response.user
   }
 
-  const logout = () => {
-    authToken.value = null
-    currentUser.value = null
-    currentUserCookie.value = null
+  const logout = async () => {
+    const headers = authHeaders.value
+    clearAuth()
+    if (!headers || !import.meta.client) {
+      return
+    }
+    try {
+      await $fetch('/auth/logout', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        headers,
+      })
+    } catch {
+      // сессия на сервере могла уже быть недействительна
+    }
   }
 
   const calculateMixed = async (input: MixedCalculationInput) => {
-    return $fetch<MixedCalculationResult>('/calculate/mixed', {
+    return apiFetch<MixedCalculationResult>('/calculate/mixed', {
       method: 'POST',
-      baseURL: config.public.apiBase,
       headers: authHeaders.value,
       body: input,
     })
   }
 
   const saveBouquetHistory = async (input: BouquetCalculationInput, orderGroupId?: string) => {
-    return $fetch<SavedBouquet>('/history/bouquets', {
+    return apiFetch<SavedBouquet>('/history/bouquets', {
       method: 'POST',
-      baseURL: config.public.apiBase,
       headers: authHeaders.value,
       body: {
         ...input,
@@ -190,9 +264,8 @@ export const useBouquetCalculator = () => {
   }
 
   const saveMiscHistory = async (lines: MiscLine[], orderGroupId?: string) => {
-    return $fetch<SavedMiscHistory>('/history/misc', {
+    return apiFetch<SavedMiscHistory>('/history/misc', {
       method: 'POST',
-      baseURL: config.public.apiBase,
       headers: authHeaders.value,
       body: {
         lines,
@@ -202,15 +275,13 @@ export const useBouquetCalculator = () => {
   }
 
   const loadBouquetHistory = async () => {
-    return $fetch<SavedBouquet[]>('/history/bouquets', {
-      baseURL: config.public.apiBase,
+    return apiFetch<SavedBouquet[]>('/history/bouquets', {
       headers: authHeaders.value,
     })
   }
 
   const loadMiscHistory = async () => {
-    return $fetch<SavedMiscHistory[]>('/history/misc', {
-      baseURL: config.public.apiBase,
+    return apiFetch<SavedMiscHistory[]>('/history/misc', {
       headers: authHeaders.value,
     })
   }
