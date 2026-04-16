@@ -1,0 +1,30 @@
+{
+  "name": "florist-studio-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --host",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "description": "MVP frontend for florist startup",
+  "dependencies": {
+    "@quasar/extras": "^1.18.0",
+    "@vueuse/core": "^14.2.1",
+    "nuxt": "^4.4.2",
+    "nuxt-quasar-ui": "^3.0.1",
+    "quasar": "^2.19.3",
+    "sass": "^1.99.0",
+    "tailwindcss": "^4.2.2",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.6.0",
+    "typescript": "^6.0.2"
+  }
+}

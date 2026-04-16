@@ -1,0 +1,68 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --color-card: var(--card);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+}
+
+:root {
+  --q-primary: #00897b;
+  --q-secondary: #546e7a;
+  --q-accent: #00897b;
+  --q-positive: #2e7d32;
+  --q-negative: #c62828;
+  --q-info: #0288d1;
+  --q-warning: #ed6c02;
+  --background: #f5f5f5;
+  --foreground: #1f2937;
+  --card: #ffffff;
+  --muted-foreground: #6b7280;
+  --border: #dfe3e8;
+  --accent: #eef2f7;
+}
+
+body.body--dark {
+  --q-primary: #26a69a;
+  --q-secondary: #90a4ae;
+  --q-accent: #26a69a;
+  --q-positive: #66bb6a;
+  --q-negative: #ef5350;
+  --q-info: #4fc3f7;
+  --q-warning: #ffb74d;
+  --background: #121212;
+  --foreground: #f5f5f5;
+  --card: #1e1e1e;
+  --muted-foreground: #a3a3a3;
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: rgba(255, 255, 255, 0.08);
+}
+
+@layer base {
+  html,
+  body,
+  #__nuxt {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .q-btn {
+    @apply rounded-2xl;
+  }
+}
