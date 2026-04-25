@@ -3,8 +3,8 @@
     <header class="border-b bg-card/95 backdrop-blur">
       <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p class="text-sm text-muted-foreground">Florist Studio v0.1</p>
-          <h5 class="text-2xl font-semibold tracking-tight">Демо версия приложения для флористов</h5>
+          <p class="text-sm text-muted-foreground">Florist Studio</p>
+          <h5 class="text-2xl font-semibold tracking-tight">Приложение для флористов</h5>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -19,18 +19,14 @@
               :class="isDark ? 'translate-x-[30px]' : 'translate-x-0'"
             />
             <span class="absolute left-1 top-1 z-10 flex h-6 w-6 items-center justify-center">
-              <QIcon
-                name="light_mode"
-                size="15px"
-                class="transition-colors duration-300"
+              <i
+                class="pi pi-sun text-[13px] transition-colors duration-300"
                 :class="!isDark && 'text-amber-500'"
               />
             </span>
             <span class="absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center">
-              <QIcon
-                name="dark_mode"
-                size="15px"
-                class="transition-colors duration-300"
+              <i
+                class="pi pi-moon text-[13px] transition-colors duration-300"
                 :class="!isDark && 'text-slate-300'"
               />
             </span>
@@ -38,14 +34,14 @@
           <NuxtLink
             to="/"
             class="rounded-2xl px-4 py-2 text-sm font-medium transition-colors"
-            :class="route.path === '/' ? 'bg-(--q-primary) text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
+            :class="route.path === '/' ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
           >
             Калькулятор
           </NuxtLink>
           <NuxtLink
             to="/history"
             class="rounded-2xl px-4 py-2 text-sm font-medium transition-colors"
-          :class="route.path === '/history' ? 'bg-(--q-primary) text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
+          :class="route.path.startsWith('/history') ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
           >
             История
           </NuxtLink>
@@ -57,15 +53,16 @@
     </header>
 
     <main class="mx-auto flex-1 max-w-6xl px-4 py-8">
-      <slot />
+      <div v-if="loading" class="flex min-h-[50vh] items-center justify-center">
+        <AppLoader />
+      </div>
+      <slot v-else />
     </main>
-    <footer class="text-center text-sm text-muted-foreground">developed by r33n</footer>
+    <footer class="text-center text-sm text-muted-foreground">developed by <a href="https://t.me/r33n_dev" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">r33n</a></footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Dark, QIcon } from 'quasar'
-
 const { currentUser } = useBouquetCalculator()
 const route = useRoute()
 const theme = useCookie<'light' | 'dark'>('florist-theme', {
@@ -76,27 +73,31 @@ const theme = useCookie<'light' | 'dark'>('florist-theme', {
 const isDark = computed(() => theme.value === 'dark')
 
 useHead(() => ({
-  bodyAttrs: {
-    class: isDark.value ? 'body--dark' : 'body--light',
+  htmlAttrs: {
+    class: isDark.value ? 'dark' : '',
   },
 }))
 
-const applyTheme = () => {
-  if (import.meta.client) {
-    Dark.set(isDark.value)
-  }
-}
-
 const toggleTheme = () => {
   theme.value = isDark.value ? 'light' : 'dark'
-  applyTheme()
 }
 
-if (import.meta.client) {
-  applyTheme()
+const hasShowLoading = useState('hasShowLoading', () => false)
+const loading = ref(!hasShowLoading.value)
+
+const showInitialLoader = async () => {
+  if (hasShowLoading.value) {
+    loading.value = false
+    return
+  }
+  
+  setTimeout(() => {
+    loading.value = false
+    hasShowLoading.value = true
+  }, 1000)
 }
 
-watch(theme, () => {
-  applyTheme()
+onMounted(() => {
+  showInitialLoader()
 })
 </script>

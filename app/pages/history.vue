@@ -2,139 +2,114 @@
   <NuxtPage v-if="isDetailRoute" />
 
   <div v-else class="space-y-6">
-    <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
-      <QCardSection class="flex items-start justify-between gap-4">
-        <div>
+    <Card>
+      <template #content>
+        <div class="flex items-start justify-between gap-4">
           <h4 class="text-lg font-semibold">История заказов</h4>
         </div>
-      </QCardSection>
 
-      <QCardSection v-if="!currentUser">
-        <QBanner :dark="isDark" rounded class="bg-amber-1 text-amber-9">
+        <Message v-if="!currentUser" severity="warn" class="mt-4">
           Сначала войди на странице `Калькулятор`, чтобы посмотреть историю.
-        </QBanner>
-      </QCardSection>
-    </QCard>
+        </Message>
+      </template>
+    </Card>
 
     <div v-if="currentUser" class="grid gap-6 lg:grid-cols-2">
-      <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
-        <QCardSection>
-          <h3 class="font-semibold">Букеты</h3>
-        </QCardSection>
+      <Card>
+        <template #content>
+          <h4 class="font-semibold">Букеты</h4>
 
-        <QSeparator :dark="isDark" />
+        <Divider />
 
-        <QCardSection v-if="!bouquetHistory.length" class="text-sm text-muted-foreground">
+        <div v-if="!bouquetHistory.length" class="text-sm text-muted-foreground">
           Пока пусто.
-        </QCardSection>
+        </div>
 
-        <QList :dark="isDark" v-else separator padding>
-          <QExpansionItem
-            :dark="isDark"
+        <div v-else class="space-y-3">
+          <details
             v-for="entry in bouquetHistory"
             :key="entry.id"
-            expand-separator
-            dense
+            class="rounded-2xl border border-border/70 p-4"
           >
-            <template #header>
-              <QItemSection  >
-                <!-- <QItemLabel class="font-medium">{{ entry.name }}</QItemLabel> -->
-                <QItemLabel caption>{{ formatDate(entry.createdAt) }}</QItemLabel>
-              </QItemSection>
-              <QItemSection side>
-                <div class="text-right">
-                  <p class="text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</p>
-                  <p class="text-sm font-medium">Итог: {{ entry.total }} KGS</p>
-                </div>
-              </QItemSection>
-            </template>
+            <summary class="flex cursor-pointer items-center justify-between gap-3">
+              <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
+              <span class="text-right">
+                <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
+                <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
+              </span>
+            </summary>
 
-            <QCard :dark="isDark" flat class="bg-background">
-              <QCardSection>
-                <p class="mb-2 font-medium">Состав букета</p>
-                <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  <li v-for="line in entry.input.lines" :key="`${entry.id}:${line.itemId}`">
-                    {{ getFlowerName(line.itemId) }} x {{ line.count }}
-                  </li>
-                </ul>
-                <NuxtLink
-                  :to="`/history/bouquets/${entry.id}`"
-                  class="mt-3 inline-flex rounded-2xl bg-(--q-primary) px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
-                >
-                  Подробнее
-                </NuxtLink>
-              </QCardSection>
-            </QCard>
-          </QExpansionItem>
-        </QList>
-      </QCard>
+            <div class="mt-4">
+              <p class="mb-2 font-medium">Состав букета</p>
+              <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                <li v-for="line in entry.input.lines" :key="`${entry.id}:${line.itemId}`">
+                  {{ getFlowerName(line.itemId) }} x {{ line.count }}
+                </li>
+              </ul>
+              <NuxtLink
+                :to="`/history/bouquets/${entry.id}`"
+                class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
+              >
+                Подробнее
+              </NuxtLink>
+            </div>
+          </details>
+        </div>
+        </template>
+      </Card>
 
-      <QCard :dark="isDark" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
-        <QCardSection>
-          <h3 class="font-semibold">Разные товары</h3>
-        </QCardSection>
+      <Card>
+        <template #content>
+          <h4 class="font-semibold">Разные товары</h4>
 
-        <QSeparator :dark="isDark" />
+        <Divider />
 
-        <QCardSection v-if="!miscHistory.length" class="text-sm text-muted-foreground">
+        <div v-if="!miscHistory.length" class="text-sm text-muted-foreground">
           Пока пусто.
-        </QCardSection>
+        </div>
 
-        <QList :dark="isDark" v-else separator padding>
-          <QExpansionItem
-            :dark="isDark"
+        <div v-else class="space-y-3">
+          <details
             v-for="entry in miscHistory"
             :key="entry.id"
-            expand-separator
-            dense
-            header-class="rounded-xl"
+            class="rounded-2xl border border-border/70 p-4"
           >
-            <template #header>
-              <QItemSection>
-                <QItemLabel class="font-medium">{{ entry.name }}</QItemLabel>
-                <QItemLabel caption>{{ formatDate(entry.createdAt) }}</QItemLabel>
-              </QItemSection>
-              <QItemSection side>
-                <div class="text-right">
-                  <p class="text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</p>
-                  <p class="text-sm font-medium">Итог: {{ entry.total }} KGS</p>
-                </div>
-              </QItemSection>
-            </template>
+            <summary class="flex cursor-pointer items-center justify-between gap-3">
+              <span>
+                <span class="block font-medium">{{ entry.name }}</span>
+                <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
+              </span>
+              <span class="text-right">
+                <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
+                <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
+              </span>
+            </summary>
 
-            <QCard :dark="isDark" flat class="bg-background">
-              <QCardSection>
-                <p class="mb-2 font-medium">Товары</p>
-                <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                  <li v-for="line in entry.breakdown" :key="`${entry.id}:${line.itemId}`">
-                    {{ line.itemName }} x {{ line.count }}
-                  </li>
-                </ul>
-                <NuxtLink
-                  :to="`/history/misc/${entry.id}`"
-                  class="mt-3 inline-flex rounded-2xl bg-(--q-primary) px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
-                >
-                  Подробнее
-                </NuxtLink>
-              </QCardSection>
-            </QCard>
-          </QExpansionItem>
-        </QList>
-      </QCard>
+            <div class="mt-4">
+              <p class="mb-2 font-medium">Товары</p>
+              <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                <li v-for="line in entry.breakdown" :key="`${entry.id}:${line.itemId}`">
+                  {{ line.itemName }} x {{ line.count }}
+                </li>
+              </ul>
+              <NuxtLink
+                :to="`/history/misc/${entry.id}`"
+                class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
+              >
+                Подробнее
+              </NuxtLink>
+            </div>
+          </details>
+        </div>
+        </template>
+      </Card>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { QBanner, QCard, QCardSection, QExpansionItem, QItemLabel, QItemSection, QList, QSeparator } from 'quasar'
-
-const theme = useCookie<'light' | 'dark'>('florist-theme', {
-  default: () => 'light',
-  sameSite: 'lax',
-})
 const route = useRoute()
 
-const isDark = computed(() => theme.value === 'dark')
 const isDetailRoute = computed(() => {
   return typeof route.params.type === 'string' && typeof route.params.id === 'string'
 })
@@ -182,7 +157,6 @@ const flowers = ref<FlowerItem[]>([])
 
 const formatDate = (value: string) => new Date(value).toLocaleString('ru-RU')
 const getFlowerName = (itemId: string) => flowers.value.find((flower) => flower.id === itemId)?.name ?? itemId
-const openHistoryDetail = (type: 'bouquets' | 'misc', id: string) => navigateTo(`/history/${type}/${id}`)
 
 onMounted(async () => {
   if (!currentUser.value) {

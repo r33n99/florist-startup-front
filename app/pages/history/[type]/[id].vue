@@ -4,7 +4,7 @@
       <div class="flex items-center gap-4">
         <NuxtLink
         to="/history"
-        class="rounded-2xl bg-(--q-primary) px-4 py-2 text-sm text-white transition-opacity hover:opacity-90"
+        class="rounded-2xl bg-primary px-4 py-2 text-sm text-white transition-opacity hover:opacity-90"
       >
         Назад к истории
       </NuxtLink>
@@ -14,20 +14,21 @@
       </div>
     </div>
 
-    <QBanner v-if="loadError" :dark="isDark" rounded class="bg-red-1 text-negative">
+    <Message v-if="loadError" severity="error">
       {{ loadError }}
-    </QBanner>
+    </Message>
 
-    <QCard v-else-if="detailEntry" :dark="isDark" flat bordered class="bg-card text-foreground">
-      <QCardSection class="space-y-2">
+    <Card v-else-if="detailEntry" class="bg-card text-foreground">
+      <template #content>
+      <div class="space-y-2">
         <p class="text-sm text-muted-foreground">Дата: {{ formatDate(detailEntry.createdAt) }}</p>
         <p class="text-sm text-muted-foreground">Себестоимость: {{ detailEntry.subtotal }} KGS</p>
         <p class="text-base font-medium">Итог: {{ detailEntry.total }} KGS</p>
-      </QCardSection>
+      </div>
 
-      <QSeparator :dark="isDark" />
+      <Divider />
 
-      <QCardSection v-if="isBouquetDetail && bouquetDetail">
+      <div v-if="isBouquetDetail && bouquetDetail">
         <p class="mb-3 font-medium">Состав букета</p>
         <ul class="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
           <li v-for="line in bouquetDetail.input.lines" :key="`${bouquetDetail.id}:${line.itemId}`">
@@ -38,36 +39,31 @@
         <div v-if="bouquetDetail.qrDataUrl" class="mt-6 flex items-center gap-4">
           <img :src="bouquetDetail.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg border bg-white p-2">
         </div>
-      </QCardSection>
+      </div>
 
-      <QCardSection v-else-if="miscDetail">
+      <div v-else-if="miscDetail">
         <p class="mb-3 font-medium">Состав товаров</p>
         <ul class="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
           <li v-for="line in miscDetail.breakdown" :key="`${miscDetail.id}:${line.itemId}`">
             {{ line.itemName }} x {{ line.count }}
           </li>
         </ul>
-      </QCardSection>
-    </QCard>
+      </div>
+      </template>
+    </Card>
 
-    <QCard v-else :dark="isDark" flat bordered class="bg-card text-foreground">
-      <QCardSection class="text-sm text-muted-foreground">
+    <Card v-else class="bg-card text-foreground">
+      <template #content>
+      <div class="text-sm text-muted-foreground">
         Запись не найдена.
-      </QCardSection>
-    </QCard>
+      </div>
+      </template>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { QBanner, QCard, QCardSection, QSeparator } from 'quasar'
-
 const route = useRoute()
-const theme = useCookie<'light' | 'dark'>('florist-theme', {
-  default: () => 'light',
-  sameSite: 'lax',
-})
-
-const isDark = computed(() => theme.value === 'dark')
 
 type BouquetLine = {
   itemId: string

@@ -12,19 +12,20 @@
   },
   "description": "MVP frontend for florist startup",
   "dependencies": {
-    "@quasar/extras": "^1.18.0",
+    "@primeuix/themes": "^2.0.3",
     "@vueuse/core": "^14.2.1",
     "nuxt": "^4.4.2",
-    "nuxt-quasar-ui": "^3.0.1",
-    "quasar": "^2.19.3",
-    "sass": "^1.99.0",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.5",
     "tailwindcss": "^4.2.2",
     "vue": "^3.5.32",
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
+    "@primevue/nuxt-module": "^4.5.5",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.6.0",
+    "@vite-pwa/nuxt": "^1.1.1",
     "typescript": "^6.0.2"
   }
 }

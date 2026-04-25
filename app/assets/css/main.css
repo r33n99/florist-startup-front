@@ -3,8 +3,11 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
+  --color-primary: var(--primary);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   --color-card: var(--card);
@@ -14,35 +17,25 @@
 }
 
 :root {
-  --q-primary: #00897b;
-  --q-secondary: #546e7a;
-  --q-accent: #00897b;
-  --q-positive: #2e7d32;
-  --q-negative: #c62828;
-  --q-info: #0288d1;
-  --q-warning: #ed6c02;
-  --background: #f5f5f5;
+  --primary: #00897b;
+  --background: #e5e0e0;
   --foreground: #1f2937;
   --card: #ffffff;
   --muted-foreground: #6b7280;
   --border: #dfe3e8;
   --accent: #eef2f7;
+  --textColor: #403f3f;
 }
 
-body.body--dark {
-  --q-primary: #26a69a;
-  --q-secondary: #90a4ae;
-  --q-accent: #26a69a;
-  --q-positive: #66bb6a;
-  --q-negative: #ef5350;
-  --q-info: #4fc3f7;
-  --q-warning: #ffb74d;
+html.dark {
+  --primary: #26a69a;
   --background: #121212;
   --foreground: #f5f5f5;
   --card: #1e1e1e;
   --muted-foreground: #a3a3a3;
   --border: rgba(255, 255, 255, 0.12);
   --accent: rgba(255, 255, 255, 0.08);
+  --textColor: #f5f5f5;
 }
 
 @layer base {
@@ -62,11 +55,17 @@ body.body--dark {
 }
 
 @layer components {
-  .q-btn {
+  .p-button,
+  .p-inputtext,
+  .p-select,
+  .p-card {
     @apply rounded-2xl;
   }
 
-  .q-field--outlined .q-field__control {
-    border-radius: 1rem;
+  .p-card {
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    box-shadow: none;
   }
 }

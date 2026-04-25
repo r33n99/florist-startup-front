@@ -3,25 +3,31 @@
     class="gap-6"
     :class="hasSidebar ? 'grid lg:grid-cols-[2fr_1fr]' : 'mx-auto max-w-3xl'"
   >
-    <QCard v-if="!currentUser" :dark="isDark" flat bordered class="bg-card text-foreground">
-      <QCardSection>
+    <Card v-if="!currentUser" class="bg-card text-foreground">
+      <template #content>
         <div class="grid gap-4 md:grid-cols-3">
-          <QInput :dark="isDark" v-model="loginForm.username" outlined label="Логин" placeholder="owner" />
-          <QInput :dark="isDark" v-model="loginForm.password" outlined type="password" label="Пароль" placeholder="owner123" />
+          <div class="space-y-2">
+            <label class="text-sm text-muted-foreground">Логин</label>
+            <InputText v-model="loginForm.username" class="w-full" placeholder="owner" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm text-muted-foreground">Пароль</label>
+            <InputText v-model="loginForm.password" class="w-full" type="password" placeholder="owner123" />
+          </div>
           <div class="flex items-end">
-            <QBtn :dark="isDark" class="w-full rounded-2xl" unelevated no-caps color="primary" label="Войти" @click="handleLogin" />
+            <Button class="w-full" label="Войти" @click="handleLogin" />
           </div>
         </div>
 
-        <QBanner :dark="isDark" v-if="authError" dense inline-actions rounded class="mt-4 bg-red-1 text-negative">
+        <Message v-if="authError" severity="error" class="mt-4">
           {{ authError }}
-        </QBanner>
+        </Message>
 
         <p class="mt-4 text-xs text-muted-foreground">
           Тестовые аккаунты: `owner / owner123`, `florist / florist123`
         </p>
-      </QCardSection>
-    </QCard>
+      </template>
+    </Card>
 
     <div v-else class="space-y-6">
       <div v-if="!bouquetEnabled && !miscEnabled" class="space-y-4 text-center">
@@ -32,22 +38,24 @@
       </div>
 
       <div class="flex items-center justify-center gap-3">
-        <button
+        <Button
+         unstyled
           type="button"
-          class="min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
-          :class="bouquetEnabled ? 'border-transparent bg-(--q-primary) text-white shadow-sm' : 'border-border bg-background text-foreground hover:border-(--q-primary) hover:text-foreground'"
+          class="min-w-[150px] sm:min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
+          :class="bouquetEnabled ? 'border-transparent bg-primary text-white shadow-sm' : 'border-border bg-background text-foreground hover:bg-primary hover:text-white hover:border-transparent'"
           @click="toggleBouquet"
         >
           Букет
-        </button>
-        <button
+      </Button>
+        <Button
+         unstyled
           type="button"
-          class="min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
-          :class="miscEnabled ? 'border-transparent bg-(--q-primary) text-white shadow-sm' : 'border-border bg-background text-foreground hover:border-(--q-primary) hover:text-foreground'"
+          class="min-w-[150px] sm:min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
+          :class="miscEnabled ? 'border-transparent bg-primary text-white shadow-sm' : 'border-border bg-background text-foreground hover:bg-primary hover:text-white hover:border-transparent'"
           @click="toggleMisc"
         >
           Разные товары
-        </button>
+        </Button>
       </div>
 
       <section v-if="bouquetEnabled" class="rounded-2xl border border-border/70 bg-background/60 p-4 md:p-5">
@@ -58,7 +66,7 @@
               Каталог цветов загружается отдельно, QR формируется только для букета.
             </p>
           </div>
-          <QBtn class="rounded-2xl!" :dark="isDark" outline no-caps color="positive" label="+ Добавить цветок" @click="addBouquetLine" />
+          <Button unstyled class="rounded-2xl text-text border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent" outlined label="+ Добавить цветок" @click="addBouquetLine" />
         </div>
 
         <div class="mt-4 space-y-3">
@@ -67,26 +75,25 @@
             :key="line.id"
             class="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
           >
-            <QSelect
-              :dark="isDark"
+            <Select
               v-model="line.itemId"
-              outlined
-              emit-value
-              map-options
-              label="Цветок"
+              class="w-full" 
               :options="flowerOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Цветок"
             />
-            <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
+            <InputNumber v-model="line.count" class="w-full" input-class="w-full" :min="1" placeholder="Количество" />
             <div class="flex items-center">
-              <QBtn class="rounded-full!" :dark="isDark" flat no-caps color="negative" label="Удалить" @click="removeBouquetLine(line.id)" />
+              <Button unstyled class="rounded-2xl text-text px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent" label="Удалить" @click="removeBouquetLine(line.id)" />
             </div>
           </div>
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-3">
-          <QInput :dark="isDark" v-model.number="markupPercent" outlined type="text" label="Наценка (%)" />
-          <QInput :dark="isDark" v-model.number="packagingCost" outlined type="text" label="Упаковка (KGS)" />
-          <QInput :dark="isDark" v-model.number="laborCost" outlined type="text"label="Работа флориста (KGS)" />
+          <InputNumber v-model="markupPercent" class="w-full" input-class="w-full" :min="0" placeholder="Наценка (%)" />
+          <InputNumber v-model="packagingCost" class="w-full" input-class="w-full" :min="0" placeholder="Упаковка (KGS)" />
+          <InputNumber v-model="laborCost" class="w-full" input-class="w-full" :min="0" placeholder="Работа флориста (KGS)" />
         </div>
       </section>
 
@@ -98,7 +105,7 @@
               Дополнительные позиции к заказу без QR.
             </p>
           </div>
-          <QBtn class="rounded-2xl!" :dark="isDark" outline no-caps color="positive" label="+ Добавить товар" @click="addMiscLine" />
+          <Button unstyled class="rounded-2xl text-textColor border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent" outlined label="+ Добавить товар" @click="addMiscLine" />
         </div>
 
         <div class="mt-4 space-y-3">
@@ -107,44 +114,42 @@
             :key="line.id"
             class="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
           >
-            <QSelect
-              :dark="isDark"
+            <Select
               v-model="line.itemId"
-              outlined
-              emit-value
-              map-options
-              label="Товар"
+              class="w-full"
               :options="miscProductOptions"
+              option-label="label"
+              option-value="value"
+              placeholder="Товар"
             />
-            <QInput :dark="isDark" v-model.number="line.count" outlined type="number" min="1" label="Количество" />
+            <InputNumber v-model="line.count" class="w-full" input-class="w-full" :min="1" placeholder="Количество" />
             <div class="flex items-center">
-              <QBtn class="rounded-full!" :dark="isDark" flat no-caps color="negative" label="Удалить" @click="removeMiscLine(line.id)" />
+              <Button unstyled class="rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent" label="Удалить" @click="removeMiscLine(line.id)" />
             </div>
           </div>
         </div>
       </section>
 
       <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
-        <QBtn
-          :dark="isDark"
+        <Button
           v-if="miscEnabled || bouquetEnabled"
-          unelevated
-          no-caps
-          color="primary"
-          class="rounded-2xl"
           label="Оформить заказ"
+          class="rounded-2xl! font-semibold! px-5! py-3! dark:text-white!"
+          :loading="loading"
+          icon-position="right"
           @click="submitOrder"
         />
       </div>
 
-      <QBanner :dark="isDark" v-if="requestError" dense inline-actions rounded class="mt-4 bg-red-1 text-negative">
+      <Message v-if="requestError" severity="error" class="mt-4">
         {{ requestError }}
-      </QBanner>
+      </Message>
     </div>
 
     <aside v-if="hasSidebar" class="space-y-4">
-      <QCard :dark="isDark" v-if="result" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
-        <QCardSection class="space-y-3">
+      <Card v-if="result" class="bg-card text-foreground">
+        <template #content>
+        <div class="space-y-3">
           <h4 class="text-2xl font-semibold leading-tight">Итог расчёта</h4>
 
           <div class="space-y-2 text-sm">
@@ -161,42 +166,33 @@
               <strong>{{ result?.grandTotal ?? 0 }} KGS</strong>
             </div>
           </div>
-        </QCardSection>
-      </QCard>
+        </div>
+        </template>
+      </Card>
 
-      <QCard :dark="isDark" v-if="savedBouquet" flat bordered class="bg-transparent rounded-2xl! text-foreground border-border/70!">
-        <QCardSection class="space-y-3">
+      <Card v-if="savedBouquet" class="bg-card text-foreground">
+        <template #content>
+        <div class="space-y-3">
           <h4 class="text-2xl font-semibold leading-tight">Букет сохранён</h4>
           <p class="text-sm text-muted-foreground">{{ formatDate(savedBouquet.createdAt) }}</p>
           <p class="text-sm">Цена: {{ savedBouquet.total }} KGS</p>
-          <div class="flex flex-col! items-center md:flex-nowrap! md:items-end gap-4">
-            <img :src="savedBouquet.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg border bg-white p-2">
-            <QBtn
-              :dark="isDark"
-              unelevated
-              no-caps
-              color="primary"
-              class="w-full! rounded-2xl!"
+          <div class="flex flex-col items-center gap-4">
+            <img :src="savedBouquet.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg bg-white p-2">
+            <Button
+            unstyled
+              class="w-full rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer bg-primary text-white hover:bg-primary/80"
               label="Печать"
               @click="printBouquetQr"
             />
           </div>
-        </QCardSection>
-      </QCard>
+        </div>
+        </template>
+      </Card>
     </aside>
   </div>
 </template>
 
 <script setup lang="ts">
-import { QBanner, QBtn, QCard, QCardSection, QInput, QSelect } from 'quasar'
-
-const theme = useCookie<'light' | 'dark'>('florist-theme', {
-  default: () => 'light',
-  sameSite: 'lax',
-})
-
-const isDark = computed(() => theme.value === 'dark')
-
 type FlowerItem = {
   id: string
   name: string
@@ -265,7 +261,6 @@ const {
   loadFlowers,
   loadMiscProducts,
   login,
-  logout,
   calculateMixed,
   saveBouquetHistory,
   saveMiscHistory,
@@ -291,6 +286,7 @@ const requestError = ref('')
 const authError = ref('')
 const hasSidebar = computed(() => Boolean(result.value || savedBouquet.value))
 const calculatorStorageKey = 'florist-calculator-state'
+const loading = ref(false)
 
 const flowerOptions = computed<SelectOption[]>(() =>
   flowers.value.map((flower) => ({
@@ -429,6 +425,7 @@ const buildMiscLines = () => {
 }
 
 const submitOrder = async () => {
+  loading.value = true
   requestError.value = ''
 
   const bouquet = bouquetEnabled.value ? buildBouquetPayload() : null
@@ -458,6 +455,8 @@ const submitOrder = async () => {
     }
   } catch (error) {
     requestError.value = error instanceof Error ? error.message : 'Не удалось оформить заказ'
+  } finally {
+    loading.value = false
   }
 }
 
@@ -489,16 +488,6 @@ const handleLogin = async () => {
   } catch (error) {
     authError.value = error instanceof Error ? error.message : 'Не удалось войти'
   }
-}
-
-const handleLogout = () => {
-  logout()
-  bouquetEnabled.value = false
-  miscEnabled.value = false
-  bouquetLines.value = []
-  miscLines.value = []
-  result.value = null
-  savedBouquet.value = null
 }
 
 const printBouquetQr = () => {
