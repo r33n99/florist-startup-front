@@ -268,6 +268,7 @@ type MiscProduct = {
   id: string
   name: string
   unitCost: number
+  category: 'card' | 'soil' | 'houseplant' | 'gift' | 'packaging'
 }
 
 type SelectOption = {
@@ -555,6 +556,7 @@ const handleLogin = async () => {
     authError.value = error instanceof Error ? error.message : 'Не удалось войти'
   }
 }
+
 
 const printBouquetQr = () => {
   if (!savedBouquet.value || !import.meta.client) {

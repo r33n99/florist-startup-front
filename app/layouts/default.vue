@@ -45,6 +45,14 @@
           >
             История
           </NuxtLink>
+          <NuxtLink
+            v-if="currentUser?.role === 'admin'"
+            to="/products"
+            class="rounded-2xl px-4 py-2 text-sm font-medium transition-colors"
+            :class="route.path.startsWith('/products') ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
+          >
+            Товары
+          </NuxtLink>
           <div v-if="currentUser" class="flex items-center md:px-3 text-sm font-medium leading-none text-foreground">
             {{ currentUser.displayName }}
           </div>

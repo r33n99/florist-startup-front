@@ -27,6 +27,10 @@ const FloristPreset = definePreset(Aura, {
   },
 })
 
+const defaultApiBase = 'http://localhost:3101'
+const apiBase = (process.env.NUXT_PUBLIC_API_BASE || defaultApiBase).replace(/\/+$/, '')
+const escapedApiBase = apiBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -74,7 +78,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:3101',
+      apiBase,
     },
   },
   pwa: {
@@ -125,7 +129,7 @@ export default defineNuxtConfig({
           },
         },
         {
-          urlPattern: /^https?:\/\/localhost:3101\/.*$/i,
+          urlPattern: new RegExp(`^${escapedApiBase}\\/.*$`, 'i'),
           handler: 'NetworkOnly',
         },
       ],
