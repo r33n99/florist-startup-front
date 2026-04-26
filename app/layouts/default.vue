@@ -53,13 +53,16 @@
           >
             Товары
           </NuxtLink>
-          <Button
+          <button
             v-if="showInstallButton"
-            size="small"
-            label="Установить приложение"
-            icon="pi pi-download"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-medium transition-colors"
+            :class="showIosInstallHint ? 'bg-primary text-white' : 'text-muted-foreground hover:bg-accent hover:text-foreground'"
             @click="handleInstallApp"
-          />
+          >
+            <i class="pi pi-download" />
+            <span>Установить приложение</span>
+          </button>
           <div v-if="currentUser" class="flex items-center md:px-3 text-sm font-medium leading-none text-foreground">
             {{ currentUser.displayName }}
           </div>
