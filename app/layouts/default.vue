@@ -53,10 +53,22 @@
           >
             Товары
           </NuxtLink>
+          <Button
+            v-if="showInstallButton"
+            size="small"
+            label="Установить приложение"
+            icon="pi pi-download"
+            @click="handleInstallApp"
+          />
           <div v-if="currentUser" class="flex items-center md:px-3 text-sm font-medium leading-none text-foreground">
             {{ currentUser.displayName }}
           </div>
         </div>
+      </div>
+      <div v-if="showIosInstallHint" class="mx-auto max-w-6xl px-4 pb-4">
+        <Message severity="info">
+          На iPhone: нажми «Поделиться» в Safari → «На экран Домой».
+        </Message>
       </div>
     </header>
 
@@ -71,6 +83,11 @@
 </template>
 
 <script setup lang="ts">
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+}
+
 const { currentUser } = useBouquetCalculator()
 const route = useRoute()
 const theme = useCookie<'light' | 'dark'>('florist-theme', {
@@ -92,6 +109,18 @@ const toggleTheme = () => {
 
 const hasShowLoading = useState('hasShowLoading', () => false)
 const loading = ref(!hasShowLoading.value)
+const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null)
+const canInstallPrompt = ref(false)
+const showIosInstallHint = ref(false)
+const isIosDevice = ref(false)
+const isStandaloneMode = ref(false)
+
+const showInstallButton = computed(() => {
+  if (!currentUser.value || isStandaloneMode.value) {
+    return false
+  }
+  return canInstallPrompt.value || isIosDevice.value
+})
 
 const showInitialLoader = async () => {
   if (hasShowLoading.value) {
@@ -105,7 +134,58 @@ const showInitialLoader = async () => {
   }, 1000)
 }
 
+const detectStandaloneMode = () => {
+  if (!import.meta.client) {
+    return false
+  }
+
+  const navigatorStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone
+  return window.matchMedia('(display-mode: standalone)').matches || navigatorStandalone === true
+}
+
+const handleInstallApp = async () => {
+  showIosInstallHint.value = false
+
+  if (isIosDevice.value) {
+    showIosInstallHint.value = true
+    return
+  }
+
+  if (!deferredInstallPrompt.value) {
+    return
+  }
+
+  await deferredInstallPrompt.value.prompt()
+  const choice = await deferredInstallPrompt.value.userChoice
+  if (choice.outcome === 'accepted') {
+    deferredInstallPrompt.value = null
+    canInstallPrompt.value = false
+  }
+}
+
+const onBeforeInstallPrompt = (event: Event) => {
+  event.preventDefault()
+  deferredInstallPrompt.value = event as BeforeInstallPromptEvent
+  canInstallPrompt.value = true
+}
+
+const onAppInstalled = () => {
+  deferredInstallPrompt.value = null
+  canInstallPrompt.value = false
+  isStandaloneMode.value = true
+  showIosInstallHint.value = false
+}
+
 onMounted(() => {
+  isIosDevice.value = /iphone|ipad|ipod/i.test(window.navigator.userAgent)
+  isStandaloneMode.value = detectStandaloneMode()
+  window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  window.addEventListener('appinstalled', onAppInstalled)
   showInitialLoader()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  window.removeEventListener('appinstalled', onAppInstalled)
 })
 </script>
