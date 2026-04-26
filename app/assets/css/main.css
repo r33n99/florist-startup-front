@@ -56,6 +56,7 @@ html.dark {
 
 @layer components {
   .p-button,
+  .p-fieldset,
   .p-inputtext,
   .p-select,
   .p-card {
@@ -67,5 +68,11 @@ html.dark {
     color: var(--foreground);
     border: 1px solid var(--border);
     box-shadow: none;
+  }
+
+  .p-fieldset {
+    background: color-mix(in srgb, var(--background) 60%, transparent);
+    color: var(--foreground);
+    border: 1px solid var(--border);
   }
 }

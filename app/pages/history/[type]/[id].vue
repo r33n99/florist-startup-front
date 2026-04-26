@@ -36,7 +36,7 @@
           </li>
         </ul>
 
-        <div v-if="bouquetDetail.qrDataUrl" class="mt-6 flex items-center gap-4">
+        <div v-if="bouquetDetail.qrDataUrl" class="mt-6 flex items-center justify-center gap-4">
           <img :src="bouquetDetail.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg border bg-white p-2">
         </div>
       </div>

@@ -11,6 +11,8 @@ type MiscProduct = {
   category: 'card' | 'soil' | 'houseplant' | 'gift' | 'packaging'
 }
 
+type MiscCategory = 'card' | 'soil' | 'houseplant' | 'gift' | 'packaging'
+
 type BouquetLine = {
   itemId: string
   count: number
@@ -286,6 +288,65 @@ export const useBouquetCalculator = () => {
     })
   }
 
+  const createFlower = async (payload: { name: string; unitCost: number }) => {
+    const flower = await apiFetch<FlowerItem>('/admin/flowers', {
+      method: 'POST',
+      headers: authHeaders.value,
+      body: payload,
+    })
+    await flowersRequest.execute()
+    return flower
+  }
+
+  const updateFlower = async (id: string, payload: { name: string; unitCost: number }) => {
+    const flower = await apiFetch<FlowerItem>(`/admin/flowers/${id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body: payload,
+    })
+    await flowersRequest.execute()
+    return flower
+  }
+
+  const deleteFlower = async (id: string) => {
+    await apiFetch(`/admin/flowers/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders.value,
+    })
+    await flowersRequest.execute()
+  }
+
+  const createMiscProduct = async (payload: { name: string; unitCost: number; category: MiscCategory }) => {
+    const product = await apiFetch<MiscProduct>('/admin/misc-products', {
+      method: 'POST',
+      headers: authHeaders.value,
+      body: payload,
+    })
+    await miscProductsRequest.execute()
+    return product
+  }
+
+  const updateMiscProduct = async (
+    id: string,
+    payload: { name: string; unitCost: number; category: MiscCategory },
+  ) => {
+    const product = await apiFetch<MiscProduct>(`/admin/misc-products/${id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      body: payload,
+    })
+    await miscProductsRequest.execute()
+    return product
+  }
+
+  const deleteMiscProduct = async (id: string) => {
+    await apiFetch(`/admin/misc-products/${id}`, {
+      method: 'DELETE',
+      headers: authHeaders.value,
+    })
+    await miscProductsRequest.execute()
+  }
+
   return {
     authToken,
     currentUser,
@@ -298,5 +359,11 @@ export const useBouquetCalculator = () => {
     saveMiscHistory,
     loadBouquetHistory,
     loadMiscHistory,
+    createFlower,
+    updateFlower,
+    deleteFlower,
+    createMiscProduct,
+    updateMiscProduct,
+    deleteMiscProduct,
   }
 }
