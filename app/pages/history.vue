@@ -2,7 +2,18 @@
   <NuxtPage v-if="isDetailRoute" />
 
   <div v-else class="space-y-6">
-    <Card>
+    <template v-if="!bouquetHistory.length || !miscHistory.length">
+      <Card class="bg-transparent! border-none!">
+        <template #content>
+          <h4 class="text-lg font-semibold text-center">История заказов пуста</h4>
+          <p class="text-sm text-muted-foreground mt-2">
+            Сначала создайте заказ в <NuxtLink to="/" class="text-primary underline">Калькуляторе</NuxtLink>
+          </p>
+        </template>
+      </Card>
+    </template>
+ <template v-else>
+  <Card>
       <template #content>
         <div class="flex items-start justify-between gap-4">
           <h4 class="text-lg font-semibold">История заказов</h4>
@@ -14,7 +25,7 @@
       </template>
     </Card>
 
-    <div v-if="currentUser" class="grid gap-6 lg:grid-cols-2">
+    <div v-if="currentUser" class="grid items-start gap-6 lg:grid-cols-2">
       <Card>
         <template #content>
           <h4 class="font-semibold">Букеты</h4>
@@ -114,6 +125,7 @@
         </template>
       </Card>
     </div>
+ </template>
   </div>
 </template>
 
