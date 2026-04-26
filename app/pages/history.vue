@@ -25,36 +25,41 @@
           Пока пусто.
         </div>
 
-        <div v-else class="space-y-3">
-          <details
+        <Accordion v-else v-model:value="openBouquetHistoryPanels" multiple class="space-y-3">
+          <AccordionPanel
             v-for="entry in bouquetHistory"
             :key="entry.id"
-            class="rounded-2xl border border-border/70 p-4"
+            :value="entry.id"
+            class="rounded-2xl border border-border/70"
           >
-            <summary class="flex cursor-pointer items-center justify-between gap-3">
-              <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
-              <span class="text-right">
-                <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
-                <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
-              </span>
-            </summary>
+            <AccordionHeader>
+              <div class="flex w-full items-center justify-between gap-3 pr-3">
+                <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
+                <span class="text-right">
+                  <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
+                  <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
+                </span>
+              </div>
+            </AccordionHeader>
 
-            <div class="mt-4">
-              <p class="mb-2 font-medium">Состав букета</p>
-              <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                <li v-for="line in entry.input.lines" :key="`${entry.id}:${line.itemId}`">
-                  {{ getFlowerName(line.itemId) }} x {{ line.count }}
-                </li>
-              </ul>
-              <NuxtLink
-                :to="`/history/bouquets/${entry.id}`"
-                class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
-              >
-                Подробнее
-              </NuxtLink>
-            </div>
-          </details>
-        </div>
+            <AccordionContent>
+              <div class="pt-2">
+                <p class="mb-2 font-medium">Состав букета</p>
+                <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  <li v-for="line in entry.input.lines" :key="`${entry.id}:${line.itemId}`">
+                    {{ getFlowerName(line.itemId) }} x {{ line.count }}
+                  </li>
+                </ul>
+                <NuxtLink
+                  :to="`/history/bouquets/${entry.id}`"
+                  class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
+                >
+                  Подробнее
+                </NuxtLink>
+              </div>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
         </template>
       </Card>
 
@@ -68,39 +73,44 @@
           Пока пусто.
         </div>
 
-        <div v-else class="space-y-3">
-          <details
+        <Accordion v-else v-model:value="openMiscHistoryPanels" multiple class="space-y-3">
+          <AccordionPanel
             v-for="entry in miscHistory"
             :key="entry.id"
-            class="rounded-2xl border border-border/70 p-4"
+            :value="entry.id"
+            class="rounded-2xl border border-border/70"
           >
-            <summary class="flex cursor-pointer items-center justify-between gap-3">
-              <span>
-                <span class="block font-medium">{{ entry.name }}</span>
-                <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
-              </span>
-              <span class="text-right">
-                <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
-                <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
-              </span>
-            </summary>
+            <AccordionHeader>
+              <div class="flex w-full items-center justify-between gap-3 pr-3">
+                <span>
+                  <span class="block font-medium">{{ entry.name }}</span>
+                  <span class="text-sm text-muted-foreground">{{ formatDate(entry.createdAt) }}</span>
+                </span>
+                <span class="text-right">
+                  <span class="block text-xs text-muted-foreground">Себестоимость: {{ entry.subtotal }} KGS</span>
+                  <span class="text-sm font-medium">Итог: {{ entry.total }} KGS</span>
+                </span>
+              </div>
+            </AccordionHeader>
 
-            <div class="mt-4">
-              <p class="mb-2 font-medium">Товары</p>
-              <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                <li v-for="line in entry.breakdown" :key="`${entry.id}:${line.itemId}`">
-                  {{ line.itemName }} x {{ line.count }}
-                </li>
-              </ul>
-              <NuxtLink
-                :to="`/history/misc/${entry.id}`"
-                class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
-              >
-                Подробнее
-              </NuxtLink>
-            </div>
-          </details>
-        </div>
+            <AccordionContent>
+              <div class="pt-2">
+                <p class="mb-2 font-medium">Товары</p>
+                <ul class="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                  <li v-for="line in entry.breakdown" :key="`${entry.id}:${line.itemId}`">
+                    {{ line.itemName }} x {{ line.count }}
+                  </li>
+                </ul>
+                <NuxtLink
+                  :to="`/history/misc/${entry.id}`"
+                  class="mt-3 inline-flex rounded-2xl bg-primary px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
+                >
+                  Подробнее
+                </NuxtLink>
+              </div>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
         </template>
       </Card>
     </div>
@@ -154,6 +164,8 @@ const { currentUser, loadBouquetHistory, loadFlowers, loadMiscHistory } = useBou
 const bouquetHistory = ref<SavedBouquet[]>([])
 const miscHistory = ref<SavedMiscHistory[]>([])
 const flowers = ref<FlowerItem[]>([])
+const openBouquetHistoryPanels = ref<string[]>([])
+const openMiscHistoryPanels = ref<string[]>([])
 
 const formatDate = (value: string) => new Date(value).toLocaleString('ru-RU')
 const getFlowerName = (itemId: string) => flowers.value.find((flower) => flower.id === itemId)?.name ?? itemId

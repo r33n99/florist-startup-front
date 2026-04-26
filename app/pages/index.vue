@@ -6,14 +6,14 @@
     <Card v-if="!currentUser" class="bg-card text-foreground">
       <template #content>
         <div class="grid gap-4 md:grid-cols-3">
-          <div class="space-y-2">
-            <label class="text-sm text-muted-foreground">Логин</label>
-            <InputText v-model="loginForm.username" class="w-full" placeholder="owner" />
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm text-muted-foreground">Пароль</label>
-            <InputText v-model="loginForm.password" class="w-full" type="password" placeholder="owner123" />
-          </div>
+          <FloatLabel variant="on">
+            <InputText id="login-username" v-model="loginForm.username" class="w-full" />
+            <label for="login-username">Логин</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputText id="login-password" v-model="loginForm.password" class="w-full" type="password" />
+            <label for="login-password">Пароль</label>
+          </FloatLabel>
           <div class="flex items-end">
             <Button class="w-full" label="Войти" @click="handleLogin" />
           </div>
@@ -39,16 +39,16 @@
 
       <div class="flex items-center justify-center gap-3">
         <Button
-         unstyled
+          unstyled
           type="button"
           class="min-w-[150px] sm:min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
           :class="bouquetEnabled ? 'border-transparent bg-primary text-white shadow-sm' : 'border-border bg-background text-foreground hover:bg-primary hover:text-white hover:border-transparent'"
           @click="toggleBouquet"
         >
           Букет
-      </Button>
+        </Button>
         <Button
-         unstyled
+          unstyled
           type="button"
           class="min-w-[150px] sm:min-w-[180px] rounded-2xl border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer"
           :class="miscEnabled ? 'border-transparent bg-primary text-white shadow-sm' : 'border-border bg-background text-foreground hover:bg-primary hover:text-white hover:border-transparent'"
@@ -58,15 +58,21 @@
         </Button>
       </div>
 
-      <section v-if="bouquetEnabled" class="rounded-2xl border border-border/70 bg-background/60 p-4 md:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h4 class="font-semibold">Состав букета</h4>
-            <p class="text-sm text-muted-foreground">
-              Каталог цветов загружается отдельно, QR формируется только для букета.
-            </p>
+      <Fieldset v-if="bouquetEnabled" class="bg-background/60 mb-5!">
+        <template #legend>
+          <div class="space-y-1">
+            <p class="font-semibold">Состав букета</p>
+            <p class="text-sm font-normal text-muted-foreground">Каталог цветов загружается отдельно, QR формируется только для букета.</p>
           </div>
-          <Button unstyled class="rounded-2xl text-text border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent" outlined label="+ Добавить цветок" @click="addBouquetLine" />
+        </template>
+
+        <div class="flex justify-end">
+          <Button
+            unstyled
+            class="rounded-2xl border border-border px-5 py-3 text-sm font-semibold text-foreground transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent"
+            label="+ Добавить цветок"
+            @click="addBouquetLine"
+          />
         </div>
 
         <div class="mt-4 space-y-3">
@@ -75,37 +81,87 @@
             :key="line.id"
             class="grid items-center gap-3 md:grid-cols-[minmax(0,1fr)_180px_auto]"
           >
-            <Select
-              v-model="line.itemId"
-              class="w-full" 
-              :options="flowerOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="Цветок"
-            />
-            <InputNumber v-model="line.count" class="w-full" input-class="w-full" :min="1" placeholder="Количество" />
+            <FloatLabel variant="on">
+              <Select
+                :input-id="`bouquet-flower-${line.id}`"
+                v-model="line.itemId"
+                class="w-full"
+                :options="flowerOptions"
+                option-label="label"
+                option-value="value"
+              />
+              <label :for="`bouquet-flower-${line.id}`">Цветок</label>
+            </FloatLabel>
+            <FloatLabel variant="on">
+              <InputNumber
+                :input-id="`bouquet-count-${line.id}`"
+                v-model="line.count"
+                class="w-full"
+                input-class="w-full"
+                :min="1"
+              />
+              <label :for="`bouquet-count-${line.id}`">Количество</label>
+            </FloatLabel>
             <div class="flex items-center">
-              <Button unstyled class="rounded-2xl text-text px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent" label="Удалить" @click="removeBouquetLine(line.id)" />
+              <Button
+                unstyled
+                class="rounded-2xl px-5 py-3 text-sm font-semibold text-foreground transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent"
+                label="Удалить"
+                @click="removeBouquetLine(line.id)"
+              />
             </div>
           </div>
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-3">
-          <InputNumber v-model="markupPercent" class="w-full" input-class="w-full" :min="0" placeholder="Наценка (%)" />
-          <InputNumber v-model="packagingCost" class="w-full" input-class="w-full" :min="0" placeholder="Упаковка (KGS)" />
-          <InputNumber v-model="laborCost" class="w-full" input-class="w-full" :min="0" placeholder="Работа флориста (KGS)" />
+          <FloatLabel variant="on">
+            <InputNumber
+              input-id="bouquet-markup-percent"
+              v-model="markupPercent"
+              class="w-full"
+              input-class="w-full"
+              :min="0"
+            />
+            <label for="bouquet-markup-percent">Наценка (%)</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              input-id="bouquet-packaging-cost"
+              v-model="packagingCost"
+              class="w-full"
+              input-class="w-full"
+              :min="0"
+            />
+            <label for="bouquet-packaging-cost">Упаковка (KGS)</label>
+          </FloatLabel>
+          <FloatLabel variant="on">
+            <InputNumber
+              input-id="bouquet-labor-cost"
+              v-model="laborCost"
+              class="w-full"
+              input-class="w-full"
+              :min="0"
+            />
+            <label for="bouquet-labor-cost">Работа флориста (KGS)</label>
+          </FloatLabel>
         </div>
-      </section>
+      </Fieldset>
 
-      <section v-if="miscEnabled" class="rounded-2xl border border-border/70 bg-background/60 p-4 md:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h4 class="font-semibold">Разные товары</h4>
-            <p class="text-sm text-muted-foreground">
-              Дополнительные позиции к заказу без QR.
-            </p>
+      <Fieldset v-if="miscEnabled" class="bg-background/60">
+        <template #legend>
+          <div class="space-y-1">
+            <p class="font-semibold">Разные товары</p>
+            <p class="text-sm font-normal text-muted-foreground">Дополнительные позиции к заказу без QR.</p>
           </div>
-          <Button unstyled class="rounded-2xl text-textColor border px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent" outlined label="+ Добавить товар" @click="addMiscLine" />
+        </template>
+
+        <div class="flex justify-end">
+          <Button
+            unstyled
+            class="rounded-2xl border border-border px-5 py-3 text-sm font-semibold text-foreground transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white hover:border-transparent"
+            label="+ Добавить товар"
+            @click="addMiscLine"
+          />
         </div>
 
         <div class="mt-4 space-y-3">
@@ -124,11 +180,16 @@
             />
             <InputNumber v-model="line.count" class="w-full" input-class="w-full" :min="1" placeholder="Количество" />
             <div class="flex items-center">
-              <Button unstyled class="rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent" label="Удалить" @click="removeMiscLine(line.id)" />
+              <Button
+                unstyled
+                class="rounded-2xl px-5 py-3 text-sm font-semibold text-foreground transition-all duration-200 cursor-pointer hover:bg-red-700 hover:text-white hover:border-transparent"
+                label="Удалить"
+                @click="removeMiscLine(line.id)"
+              />
             </div>
           </div>
         </div>
-      </section>
+      </Fieldset>
 
       <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
         <Button
@@ -136,7 +197,7 @@
           label="Оформить заказ"
           class="rounded-2xl! font-semibold! px-5! py-3! dark:text-white!"
           :loading="loading"
-          icon-position="right"
+          icon-pos="right"
           @click="submitOrder"
         />
       </div>
@@ -177,9 +238,13 @@
           <p class="text-sm text-muted-foreground">{{ formatDate(savedBouquet.createdAt) }}</p>
           <p class="text-sm">Цена: {{ savedBouquet.total }} KGS</p>
           <div class="flex flex-col items-center gap-4">
-            <img :src="savedBouquet.qrDataUrl" alt="QR code" class="h-40 w-40 rounded-lg bg-white p-2">
+            <Image
+              :src="savedBouquet.qrDataUrl"
+              alt="QR code"
+              image-class="h-40 w-40 rounded-lg bg-white p-2"
+            />
             <Button
-            unstyled
+              unstyled
               class="w-full rounded-2xl px-5 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer bg-primary text-white hover:bg-primary/80"
               label="Печать"
               @click="printBouquetQr"
@@ -433,6 +498,7 @@ const submitOrder = async () => {
 
   if (!bouquet && misc.length === 0) {
     requestError.value = 'Добавь хотя бы одну позицию перед оформлением заказа'
+    loading.value = false
     return
   }
 
