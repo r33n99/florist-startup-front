@@ -1,6 +1,10 @@
 <template>
   <div class="space-y-6">
-    <Card v-if="!currentUser" class="bg-card text-foreground">
+    <div v-if="isProductsLoading" class="flex min-h-[50vh] items-center justify-center">
+      <AppLoader />
+    </div>
+
+    <Card v-else-if="!currentUser" class="bg-card text-foreground">
       <template #content>
         <Message severity="warn">
           Сначала войди в систему.
@@ -152,6 +156,7 @@ const isAdmin = computed(() => currentUser.value?.role === 'admin')
 const flowers = ref<FlowerItem[]>([])
 const miscProducts = ref<MiscProduct[]>([])
 const adminLoading = ref(false)
+const isProductsLoading = ref(true)
 const adminError = ref('')
 const adminSuccess = ref('')
 const miscCategoryOptions = [
@@ -193,6 +198,7 @@ const handleCreateFlower = async () => {
   }
 
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await createFlower({
       name: newFlowerForm.name.trim(),
@@ -206,6 +212,7 @@ const handleCreateFlower = async () => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось добавить цветок'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
@@ -213,6 +220,7 @@ const handleUpdateFlower = async (flower: FlowerItem) => {
   adminError.value = ''
   adminSuccess.value = ''
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await updateFlower(flower.id, {
       name: flower.name.trim(),
@@ -224,6 +232,7 @@ const handleUpdateFlower = async (flower: FlowerItem) => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось обновить цветок'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
@@ -238,6 +247,7 @@ const handleDeleteFlower = async (flower: FlowerItem) => {
   adminError.value = ''
   adminSuccess.value = ''
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await deleteFlower(flower.id)
     await refreshCatalog()
@@ -246,6 +256,7 @@ const handleDeleteFlower = async (flower: FlowerItem) => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось удалить цветок'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
@@ -258,6 +269,7 @@ const handleCreateMiscProduct = async () => {
   }
 
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await createMiscProduct({
       name: newMiscForm.name.trim(),
@@ -273,6 +285,7 @@ const handleCreateMiscProduct = async () => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось добавить товар'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
@@ -280,6 +293,7 @@ const handleUpdateMiscProduct = async (product: MiscProduct) => {
   adminError.value = ''
   adminSuccess.value = ''
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await updateMiscProduct(product.id, {
       name: product.name.trim(),
@@ -292,6 +306,7 @@ const handleUpdateMiscProduct = async (product: MiscProduct) => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось обновить товар'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
@@ -306,6 +321,7 @@ const handleDeleteMiscProduct = async (product: MiscProduct) => {
   adminError.value = ''
   adminSuccess.value = ''
   adminLoading.value = true
+  isProductsLoading.value = true
   try {
     await deleteMiscProduct(product.id)
     await refreshCatalog()
@@ -314,14 +330,20 @@ const handleDeleteMiscProduct = async (product: MiscProduct) => {
     adminError.value = error instanceof Error ? error.message : 'Не удалось удалить товар'
   } finally {
     adminLoading.value = false
+    isProductsLoading.value = false
   }
 }
 
 onMounted(async () => {
   if (!currentUser.value || !isAdmin.value) {
+    isProductsLoading.value = false
     return
   }
 
-  await refreshCatalog()
+  try {
+    await refreshCatalog()
+  } finally {
+    isProductsLoading.value = false
+  }
 })
 </script>

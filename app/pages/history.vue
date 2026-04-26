@@ -1,6 +1,10 @@
 <template>
   <NuxtPage v-if="isDetailRoute" />
 
+  <div v-else-if="isHistoryLoading" class="flex min-h-[50vh] items-center justify-center">
+    <AppLoader />
+  </div>
+
   <div v-else class="space-y-6">
     <template v-if="!bouquetHistory.length || !miscHistory.length">
       <Card class="bg-transparent! border-none!">
@@ -178,17 +182,23 @@ const miscHistory = ref<SavedMiscHistory[]>([])
 const flowers = ref<FlowerItem[]>([])
 const openBouquetHistoryPanels = ref<string[]>([])
 const openMiscHistoryPanels = ref<string[]>([])
+const isHistoryLoading = ref(true)
 
 const formatDate = (value: string) => new Date(value).toLocaleString('ru-RU')
 const getFlowerName = (itemId: string) => flowers.value.find((flower) => flower.id === itemId)?.name ?? itemId
 
 onMounted(async () => {
   if (!currentUser.value) {
+    isHistoryLoading.value = false
     return
   }
 
-  flowers.value = await loadFlowers()
-  bouquetHistory.value = await loadBouquetHistory()
-  miscHistory.value = await loadMiscHistory()
+  try {
+    flowers.value = await loadFlowers()
+    bouquetHistory.value = await loadBouquetHistory()
+    miscHistory.value = await loadMiscHistory()
+  } finally {
+    isHistoryLoading.value = false
+  }
 })
 </script>
